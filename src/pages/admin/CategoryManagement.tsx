@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    Plus, Trash2, Edit2, Tag, Search, 
-    X, Check, Loader2, List
+    Plus, Trash2, Edit2, Search, 
+    X, Check, Loader2
 } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 

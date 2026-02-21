@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Mail, ArrowRight, ShieldCheck, Cpu, Globe, Zap } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, Globe, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggle from '../../components/admin/ThemeToggle';
 

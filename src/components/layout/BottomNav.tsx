@@ -1,6 +1,6 @@
 import { Home, Search, ShoppingBag, UserPlus } from 'lucide-react';
 import { useCartStore } from '../../store/useStore';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CartModal from '../ui/CartModal';
 

@@ -9,7 +9,6 @@ import AdminLayout from '../../components/admin/AdminLayout';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const navigate = useNavigate();
@@ -36,8 +35,6 @@ const AdminDashboard = () => {
         } catch (error) {
             console.error('Error fetching products:', error);
             setProducts([]);
-        } finally {
-            setLoading(false);
         }
     };
 
