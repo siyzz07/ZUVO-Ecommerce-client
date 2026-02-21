@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    Save, Camera, Store, Phone, Mail, Plus, X, 
-    ShieldCheck, Image as ImageIcon, Map as MapIcon,
-    Globe, User, Upload, Loader2
+    Save, Camera, Store, Phone, Mail, X, 
+    Image as ImageIcon, Map as MapIcon,
+    User, Upload, Loader2
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';

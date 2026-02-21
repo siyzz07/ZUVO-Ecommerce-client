@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+
 import { 
-    Plus, Trash2, Tag, IndianRupee, 
+    Trash2, Tag, IndianRupee, 
     ImageIcon, ChevronLeft,
-    Eye, X, Upload, Loader2, Save
+    Upload, Loader2, Save
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -14,7 +14,6 @@ const EditProduct = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState<number | null>(null);
-    const [showPreview, setShowPreview] = useState(false);
     
     const [formData, setFormData] = useState({
         name: '',
@@ -155,7 +154,6 @@ const EditProduct = () => {
         <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 shadow-xl">
             <div className="flex items-center justify-between mb-6">
                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Preview</span>
-                <button className="lg:hidden p-2 text-zinc-400" onClick={() => setShowPreview(false)}><X size={20} /></button>
             </div>
 
             <div className="aspect-square rounded-2xl bg-zinc-50 dark:bg-zinc-800 overflow-hidden mb-6 border border-zinc-100 dark:border-zinc-800">

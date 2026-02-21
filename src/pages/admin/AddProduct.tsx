@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    Plus, Trash2, Tag, IndianRupee, 
-    ImageIcon, Sparkles, Rocket, Zap, ChevronLeft,
+    Trash2, Tag, IndianRupee, 
+    ImageIcon, Zap, 
     Eye, X, Upload, Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,6 @@ const AddProduct = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState<number | null>(null);
     const [showPreview, setShowPreview] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         name: '',
         price: '',
