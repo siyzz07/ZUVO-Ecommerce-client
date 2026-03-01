@@ -54,7 +54,7 @@ const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => {
                     <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg shadow-brand-primary/20">
                         <ShieldCheck className="text-white" size={20} />
                     </div>
-                    <span className="font-bold text-xl tracking-tight dark:text-white">ZOVO Admin</span>
+                    <span className="font-bold text-xl tracking-tight dark:text-white">ZUVO Admin</span>
                 </div>
 
                 <nav className="space-y-1 flex-grow">
@@ -98,7 +98,7 @@ const AdminLayout = ({ children, title, subtitle }: AdminLayoutProps) => {
                     <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
                         <ShieldCheck className="text-white" size={16} />
                     </div>
-                    <span className="font-bold text-lg dark:text-white">ZOVO Admin</span>
+                    <span className="font-bold text-lg dark:text-white">ZUVO Admin</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <ThemeToggle />

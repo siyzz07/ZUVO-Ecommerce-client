@@ -21,7 +21,7 @@ const ProductDetailsModal = ({ product, isOpen, onClose }: ProductDetailsModalPr
   if (!product) return null;
 
   const handleWhatsAppOrder = () => {
-    const message = `Hi OZACO! I'm interested in buying: ${product.name} (₹${product.price}). Is it in stock?`;
+    const message = `Hi ZUVO! I'm interested in buying: ${product.name} (₹${product.price}). Is it in stock?`;
     window.open(`https://wa.me/911234567890?text=${encodeURIComponent(message)}`, '_blank');
   };
 

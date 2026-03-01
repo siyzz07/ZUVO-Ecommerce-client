@@ -57,7 +57,7 @@ const AdminLogin = () => {
                         <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-xl shadow-brand-primary/20">
                             <ShieldCheck className="text-white" size={20} />
                         </div>
-                        <span className="text-white font-extrabold text-xl tracking-tight uppercase">OZACO</span>
+                        <span className="text-white font-extrabold text-xl tracking-tight uppercase">ZUVO</span>
                     </div>
 
                     <div className="max-w-md">
@@ -109,7 +109,7 @@ const AdminLogin = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-xl py-4 pl-12 pr-5 font-semibold text-sm focus:ring-4 focus:ring-brand-primary/10 transition-all outline-none dark:text-white shadow-sm"
-                                    placeholder="admin@ozaco.com"
+                                    placeholder="admin@zuvo.com"
                                 />
                             </div>
                         </div>

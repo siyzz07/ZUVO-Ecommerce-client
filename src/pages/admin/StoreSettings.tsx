@@ -62,6 +62,7 @@ const StoreSettings = () => {
                     location: data.location || { lat: 28.6139, lng: 77.2090 }
                 });
                 setCoverPhotos(data.coverPhotos || []);
+                if (data.profilePic) setProfilePic(data.profilePic);
             }
         } catch (error) {
             console.error('Error fetching shop settings:', error);
@@ -130,7 +131,7 @@ const StoreSettings = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ ...shopData, coverPhotos }),
+                body: JSON.stringify({ ...shopData, coverPhotos, profilePic }),
             });
 
             const profileRes = await fetch('http://localhost:5000/api/auth/profile', {

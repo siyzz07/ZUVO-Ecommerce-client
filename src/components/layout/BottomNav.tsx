@@ -20,21 +20,21 @@ const BottomNav = () => {
   const handleSaveContact = () => {
     const vcard = `BEGIN:VCARD
 VERSION:3.0
-FN:OZACO Mobile Hub
-N:Hub;OZACO;Mobile;;
+FN:ZUVO Mobile Hub
+N:Hub;ZUVO;Mobile;;
 TEL;TYPE=CELL:+911234567890
-EMAIL;TYPE=WORK:support@ozaco.com
-ORG:OZACO Mobile Hub
+EMAIL;TYPE=WORK:support@zuvo.com
+ORG:ZUVO Mobile Hub
 TITLE:Premium Gadget Store
 ADR;TYPE=WORK:;;123 Premium Street, Hub Lane;Gadget City;State;India
-URL:https://ozaco.com
+URL:https://zuvo.com
 END:VCARD`;
     
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'OZACO_Contact.vcf');
+    link.setAttribute('download', 'ZUVO_Contact.vcf');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

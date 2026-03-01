@@ -2,9 +2,9 @@ import { Instagram, Twitter, Facebook } from 'lucide-react';
 
 const SocialSection = () => {
   const socials = [
-    { name: 'Instagram', label: '@ozaco_hub', icon: Instagram, color: 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600', link: '#' },
-    { name: 'X (Twitter)', label: 'ozaco_mobile', icon: Twitter, color: 'bg-zinc-950', link: '#' },
-    { name: 'Facebook', label: 'Ozaco Mobile Official', icon: Facebook, color: 'bg-blue-600', link: '#' }
+    { name: 'Instagram', label: '@zuvo_hub', icon: Instagram, color: 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600', link: '#' },
+    { name: 'X (Twitter)', label: 'zuvo_mobile', icon: Twitter, color: 'bg-zinc-950', link: '#' },
+    { name: 'Facebook', label: 'Zuvo Mobile Official', icon: Facebook, color: 'bg-blue-600', link: '#' }
   ];
 
   return (

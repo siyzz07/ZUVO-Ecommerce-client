@@ -4,7 +4,7 @@ const AboutSection = () => {
       <div className="space-y-4">
         <h2 className="text-4xl font-black tracking-tighter uppercase italic">Redefining Excellence <br /> <span className="text-brand-primary underline">Since 2018</span></h2>
         <p className="text-zinc-500 dark:text-zinc-400 font-medium text-lg leading-relaxed">
-          Ozaco Mobile was born out of a desire to bring the world's most innovative mobile accessories to your doorstep. We believe gadgets should not only be functional but also an extension of your personality.
+          Zuvo Mobile was born out of a desire to bring the world's most innovative mobile accessories to your doorstep. We believe gadgets should not only be functional but also an extension of your personality.
         </p>
       </div>
       

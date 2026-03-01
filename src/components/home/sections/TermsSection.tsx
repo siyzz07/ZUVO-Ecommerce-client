@@ -23,7 +23,7 @@ const TermsSection = () => {
         </div>
         <div className="space-y-4">
           <h4 className="font-bold text-lg m-0 underline decoration-brand-primary underline-offset-4">Warranty Scope</h4>
-          <p className="text-sm opacity-60 leading-relaxed font-medium">Original brand warranties apply where applicable. Ozaco provides complementary tech assistance for the first 30 days of purchase.</p>
+          <p className="text-sm opacity-60 leading-relaxed font-medium">Original brand warranties apply where applicable. Zuvo provides complementary tech assistance for the first 30 days of purchase.</p>
         </div>
       </div>
     </div>

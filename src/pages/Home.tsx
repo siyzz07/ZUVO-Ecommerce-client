@@ -13,6 +13,7 @@ import AboutSection from '../components/home/sections/AboutSection';
 import TermsSection from '../components/home/sections/TermsSection';
 import SocialSection from '../components/home/sections/SocialSection';
 import { Product } from '../types';
+import { useSearchStore } from '../store/useStore';
 
 const categories = [
   { name: 'Products', icon: LayoutGrid },
@@ -29,6 +30,20 @@ const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [shopSettings, setShopSettings] = useState<any>(null);
   const [currentCoverIndex, setCurrentCoverIndex] = useState(0);
+  const { query: searchQuery } = useSearchStore();
+
+  const filteredProducts = products.filter((p) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return p.name.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q);
+  });
+
+  // Auto-switch to Products tab when search query is active
+  useEffect(() => {
+    if (searchQuery.trim() && selectedCategory !== 'Products') {
+      setSelectedCategory('Products');
+    }
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchShopSettings();
@@ -66,18 +81,18 @@ const Home = () => {
   const handleSaveContact = () => {
     const vcard = `BEGIN:VCARD
 VERSION:3.0
-FN:${shopSettings?.shopName || 'ZOVO Mobile Hub'}
-N:Hub;${shopSettings?.shopName?.split(' ')[0] || 'ZOVO'};Mobile;;
+FN:${shopSettings?.shopName || 'ZUVO Mobile Hub'}
+N:Hub;${shopSettings?.shopName?.split(' ')[0] || 'ZUVO'};Mobile;;
 TEL;TYPE=CELL:${shopSettings?.phone || '+911234567890'}
-EMAIL;TYPE=WORK:${shopSettings?.email || 'support@zovo.com'}
-ORG:${shopSettings?.shopName || 'ZOVO Mobile Hub'}
+EMAIL;TYPE=WORK:${shopSettings?.email || 'support@zuvo.com'}
+ORG:${shopSettings?.shopName || 'ZUVO Mobile Hub'}
 ADR;TYPE=WORK:;;${shopSettings?.address || '123 Premium Street, Hub Lane;Gadget City;;India'}
 END:VCARD`;
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'ZOVO_Contact.vcf');
+    link.setAttribute('download', 'ZUVO_Contact.vcf');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -102,14 +117,14 @@ END:VCARD`;
 
   const renderSection = () => {
     switch (selectedCategory) {
-      case 'Products': return <ProductsSection products={products} />;
-      case 'Contact': return <ContactSection />;
+      case 'Products': return <ProductsSection products={filteredProducts} />;
+      case 'Contact': return <ContactSection shopSettings={shopSettings} />;
       case 'Service': return <ServiceSection />;
       case 'Gallery': return <GallerySection />;
       case 'About Us': return <AboutSection />;
       case 'Terms': return <TermsSection />;
       case 'Social': return <SocialSection />;
-      default: return <ProductsSection products={products} />;
+      default: return <ProductsSection products={filteredProducts} />;
     }
   };
 
@@ -153,7 +168,7 @@ END:VCARD`;
               className="w-32 h-32 md:w-44 md:h-44 rounded-3xl md:rounded-[2.5rem] border-[4px] border-white dark:border-zinc-950 overflow-hidden shadow-luxury bg-white"
             >
               <img 
-                src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=400&auto=format&fit=crop" 
+                src={shopSettings?.profilePic || "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=400&auto=format&fit=crop"} 
                 className="w-full h-full object-cover" 
                 alt="Profile" 
               />
@@ -161,7 +176,7 @@ END:VCARD`;
             
             <div className="flex-1 text-center md:text-left pb-2">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{shopSettings?.shopName || 'ZOVO Mobile'}</h1>
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{shopSettings?.shopName || 'ZUVO Mobile'}</h1>
                 <span className="px-2.5 py-0.5 bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase rounded-md">Official</span>
               </div>
               <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-sm md:text-base leading-snug max-w-lg mx-auto md:mx-0">
@@ -177,16 +192,25 @@ END:VCARD`;
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto mt-8 md:mt-10">
-               <button className="w-full md:w-auto flex items-center justify-center gap-2.5 bg-brand-primary text-white px-8 py-3 rounded-2xl shadow-xl shadow-brand-primary/20 hover:opacity-95 transition-all font-black text-sm uppercase tracking-tighter">
+               <a 
+                 href={`tel:${shopSettings?.phone || ''}`}
+                 className="w-full md:w-auto flex items-center justify-center gap-2.5 bg-brand-primary text-white px-8 py-3 rounded-2xl shadow-xl shadow-brand-primary/20 hover:opacity-95 transition-all font-black text-sm uppercase tracking-tighter"
+               >
                  <Phone size={18} fill="currentColor" />
                  Call Support
-               </button>
+               </a>
                
                 <div className="flex gap-2 w-full md:w-auto">
-                 <button className="flex-1 md:w-13 md:h-13 flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-sm text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all py-3 md:py-0" title="Chat">
+                 <a 
+                   href={`https://wa.me/${shopSettings?.phone?.replace(/[^0-9]/g, '') || ''}`}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="flex-1 md:w-13 md:h-13 flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-sm text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all py-3 md:py-0" 
+                   title="Chat"
+                 >
                    <MessageCircle size={20} className="text-brand-primary" />
                    <span className="md:hidden font-bold text-[10px] uppercase tracking-widest leading-none text-zinc-900 dark:text-white">Chat</span>
-                 </button>
+                 </a>
                  
                  <button 
                    onClick={handleSaveContact}
@@ -197,10 +221,16 @@ END:VCARD`;
                    <span className="md:hidden font-bold text-[10px] uppercase tracking-widest leading-none text-zinc-900 dark:text-white">Save</span>
                  </button>
 
-                 <button className="flex-1 md:w-13 md:h-13 flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-sm text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all py-3 md:py-0" title="Store Location">
+                 <a 
+                   href={`https://www.google.com/maps?q=${shopSettings?.location?.lat || 0},${shopSettings?.location?.lng || 0}`}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="flex-1 md:w-13 md:h-13 flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-sm text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all py-3 md:py-0" 
+                   title="Store Location"
+                 >
                    <MapPin size={20} className="text-brand-primary" />
                    <span className="md:hidden font-bold text-[10px] uppercase tracking-widest leading-none text-zinc-900 dark:text-white">Map</span>
-                 </button>
+                 </a>
                </div>
             </div>
           </div>
@@ -216,7 +246,9 @@ END:VCARD`;
                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">{selectedCategory}</h3>
              </div>
              <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest opacity-60">
-               {selectedCategory === 'Products' ? 'High-performance gadgets' : `Explore our ${selectedCategory.toLowerCase()}`}
+               {selectedCategory === 'Products' 
+                 ? (searchQuery.trim() ? `Showing results for "${searchQuery}"` : 'High-performance gadgets') 
+                 : `Explore our ${selectedCategory.toLowerCase()}`}
              </p>
            </div>
            
@@ -258,11 +290,11 @@ END:VCARD`;
       <footer className="px-5 py-12 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-2 grayscale opacity-50">
-               <span className="font-extrabold text-xl tracking-tighter">ZOVO</span>
+               <span className="font-extrabold text-xl tracking-tighter">{shopSettings?.shopName || 'ZUVO'}</span>
             </div>
             
             <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest text-center">
-              © 2024 ZOVO Mobile Hub • Standards of Excellence
+              © {new Date().getFullYear()} {shopSettings?.shopName || 'ZUVO Mobile Hub'} • Standards of Excellence
             </p>
             
             <div className="flex gap-4">

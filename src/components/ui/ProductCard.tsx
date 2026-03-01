@@ -24,7 +24,7 @@ const ProductCard = (props: ProductCardProps) => {
   };
 
   const handleOrderNow = () => {
-    const message = `Hi OZACO! I want to order: ${name} (₹${price}). Is it available?`;
+    const message = `Hi ZUVO! I want to order: ${name} (₹${price}). Is it available?`;
     window.open(`https://wa.me/911234567890?text=${encodeURIComponent(message)}`, '_blank');
   };
 
