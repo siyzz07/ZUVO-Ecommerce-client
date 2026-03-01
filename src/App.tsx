@@ -14,6 +14,10 @@ import EditProduct from './pages/admin/EditProduct';
 import StoreSettings from './pages/admin/StoreSettings';
 import CategoryManagement from './pages/admin/CategoryManagement';
 
+// Auth Guards
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicRoute from './components/auth/PublicRoute';
+
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
@@ -46,15 +50,18 @@ function App() {
     <Router>
       <MainLayout>
         <Routes>
+          {/* Public Customer Route */}
           <Route path="/" element={<Home />} />
           
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/add-product" element={<AddProduct />} />
-          <Route path="/admin/edit-product/:id" element={<EditProduct />} />
-          <Route path="/admin/settings" element={<StoreSettings />} />
-          <Route path="/admin/categories" element={<CategoryManagement />} />
+          {/* Admin Login — redirects to dashboard if already logged in */}
+          <Route path="/admin/login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
+
+          {/* Protected Admin Routes — requires valid JWT */}
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/add-product" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
+          <Route path="/admin/edit-product/:id" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute><StoreSettings /></ProtectedRoute>} />
+          <Route path="/admin/categories" element={<ProtectedRoute><CategoryManagement /></ProtectedRoute>} />
         </Routes>
       </MainLayout>
     </Router>
@@ -62,3 +69,4 @@ function App() {
 }
 
 export default App;
+

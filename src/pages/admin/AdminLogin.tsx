@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Mail, ArrowRight, ShieldCheck, Globe, Zap } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from '../../components/admin/ThemeToggle';
 import { authApi } from '../../api/authApi';
 
@@ -11,6 +11,10 @@ const AdminLogin = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Redirect to the page the user was trying to visit, or dashboard
+    const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,7 +25,7 @@ const AdminLogin = () => {
             const { data } = await authApi.login({ email, password });
             localStorage.setItem('adminToken', data.token);
             localStorage.setItem('adminUser', JSON.stringify(data.user));
-            navigate('/admin/dashboard');
+            navigate(from, { replace: true });
         } catch (err: any) {
             const message = err.response?.data?.message || 'Connection failed. Please check your internet.';
             setError(message);

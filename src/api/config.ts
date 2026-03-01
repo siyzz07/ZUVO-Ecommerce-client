@@ -16,4 +16,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle 401 responses — auto-logout on expired/invalid token
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      // Redirect to login if on an admin page
+      if (window.location.pathname.startsWith('/admin') && 
+          window.location.pathname !== '/admin/login') {
+        window.location.href = '/admin/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
+
