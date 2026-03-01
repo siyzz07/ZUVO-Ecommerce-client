@@ -102,7 +102,7 @@ END:VCARD`;
     if (!shopSettings?.coverPhotos?.length) return;
     setCurrentCoverIndex((prev) => (prev + 1) % shopSettings.coverPhotos.length);
   };
-
+// test
   const prevCover = () => {
     if (!shopSettings?.coverPhotos?.length) return;
     setCurrentCoverIndex((prev) => (prev - 1 + shopSettings.coverPhotos.length) % shopSettings.coverPhotos.length);
