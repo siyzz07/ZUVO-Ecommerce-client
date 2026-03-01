@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { categoryApi } from '../../api/categoryApi';
+import { uploadApi } from '../../api/uploadApi';
+import { productApi } from '../../api/productApi';
 
 const AddProduct = () => {
     const navigate = useNavigate();
@@ -27,8 +30,7 @@ const AddProduct = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/categories');
-                const data = await response.json();
+                const { data } = await categoryApi.getAll();
                 setCategories(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -57,21 +59,8 @@ const AddProduct = () => {
         uploadData.append('image', file);
 
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch('http://localhost:5000/api/upload/image', {
-                method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${token}`
-                },
-                body: uploadData,
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                handleImageChange(index, data.url);
-            } else {
-                alert('Upload failed. Please check backend logs.');
-            }
+            const { data } = await uploadApi.uploadImage(uploadData);
+            handleImageChange(index, data.url);
         } catch (error) {
             console.error('Upload error:', error);
             alert('Upload error. Make sure backend is running and Cloudinary is configured.');
@@ -96,24 +85,13 @@ const AddProduct = () => {
         setLoading(true);
 
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch('http://localhost:5000/api/products', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    price: Number(formData.price),
-                    originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined
-                }),
+            await productApi.create({
+                ...formData,
+                price: Number(formData.price),
+                originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined
             });
-
-            if (response.ok) {
-                alert('Product successfully added.');
-                navigate('/admin/dashboard');
-            }
+            alert('Product successfully added.');
+            navigate('/admin/dashboard');
         } catch (error) {
             console.error('Submission error:', error);
         } finally {

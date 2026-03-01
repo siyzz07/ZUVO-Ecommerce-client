@@ -14,6 +14,8 @@ import TermsSection from '../components/home/sections/TermsSection';
 import SocialSection from '../components/home/sections/SocialSection';
 import { Product } from '../types';
 import { useSearchStore } from '../store/useStore';
+import { shopApi } from '../api/shopApi';
+import { productApi } from '../api/productApi';
 
 const categories = [
   { name: 'Products', icon: LayoutGrid },
@@ -52,11 +54,8 @@ const Home = () => {
 
   const fetchShopSettings = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/shop');
-      if (response.ok) {
-        const data = await response.json();
-        setShopSettings(data);
-      }
+      const { data } = await shopApi.getSettings();
+      setShopSettings(data);
     } catch (error) {
       console.error('Error fetching shop settings:', error);
     }
@@ -64,15 +63,12 @@ const Home = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products');
-      if (response.ok) {
-        const data = await response.json();
-        const mappedProducts = Array.isArray(data) ? data.map((p: any) => ({
-            ...p,
-            id: p._id
-        })) : [];
-        setProducts(mappedProducts);
-      }
+      const { data } = await productApi.getAll();
+      const mappedProducts = Array.isArray(data) ? data.map((p: any) => ({
+          ...p,
+          id: p._id
+      })) : [];
+      setProducts(mappedProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -102,7 +98,7 @@ END:VCARD`;
     if (!shopSettings?.coverPhotos?.length) return;
     setCurrentCoverIndex((prev) => (prev + 1) % shopSettings.coverPhotos.length);
   };
-// test
+
   const prevCover = () => {
     if (!shopSettings?.coverPhotos?.length) return;
     setCurrentCoverIndex((prev) => (prev - 1 + shopSettings.coverPhotos.length) % shopSettings.coverPhotos.length);

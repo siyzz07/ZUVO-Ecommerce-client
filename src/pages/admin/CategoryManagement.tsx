@@ -5,6 +5,7 @@ import {
     X, Check, Loader2
 } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { categoryApi } from '../../api/categoryApi';
 
 const CategoryManagement = () => {
     const [categories, setCategories] = useState<any[]>([]);
@@ -26,8 +27,7 @@ const CategoryManagement = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/categories');
-            const data = await response.json();
+            const { data } = await categoryApi.getAll();
             setCategories(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -49,14 +49,8 @@ const CategoryManagement = () => {
         if (!confirm('Are you sure? This might affect products in this category.')) return;
         
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`http://localhost:5000/api/categories/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-                setCategories(categories.filter(c => c._id !== id));
-            }
+            await categoryApi.delete(id);
+            setCategories(categories.filter(c => c._id !== id));
         } catch (error) {
             console.error('Delete error:', error);
         }
@@ -67,25 +61,13 @@ const CategoryManagement = () => {
         setActionLoading(true);
         
         try {
-            const token = localStorage.getItem('adminToken');
-            const url = editingId 
-                ? `http://localhost:5000/api/categories/${editingId}`
-                : 'http://localhost:5000/api/categories';
-            const method = editingId ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                await fetchCategories();
-                resetForm();
+            if (editingId) {
+                await categoryApi.update(editingId, formData);
+            } else {
+                await categoryApi.create(formData);
             }
+            await fetchCategories();
+            resetForm();
         } catch (error) {
             console.error('Submit error:', error);
         } finally {

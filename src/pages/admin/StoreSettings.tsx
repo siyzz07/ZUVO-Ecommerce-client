@@ -9,6 +9,9 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { shopApi } from '../../api/shopApi';
+import { uploadApi } from '../../api/uploadApi';
+import { authApi } from '../../api/authApi';
 
 // Fix for default marker icon in Leaflet + React
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -50,8 +53,7 @@ const StoreSettings = () => {
 
     const fetchSettings = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/shop');
-            const data = await response.json();
+            const { data } = await shopApi.getSettings();
             if (data) {
                 setShopData({
                     shopName: data.shopName || '',
@@ -92,24 +94,11 @@ const StoreSettings = () => {
         uploadData.append('image', file);
 
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch('http://localhost:5000/api/upload/image', {
-                method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${token}`
-                },
-                body: uploadData,
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (type === 'profile') {
-                    setProfilePic(data.url);
-                } else {
-                    setCoverInput(data.url);
-                }
+            const { data } = await uploadApi.uploadImage(uploadData);
+            if (type === 'profile') {
+                setProfilePic(data.url);
             } else {
-                alert('Upload failed');
+                setCoverInput(data.url);
             }
         } catch (error) {
             console.error('Upload error:', error);
@@ -123,40 +112,22 @@ const StoreSettings = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
-            
-            const shopRes = await fetch('http://localhost:5000/api/shop', {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ ...shopData, coverPhotos, profilePic }),
-            });
+            await shopApi.updateSettings({ ...shopData, coverPhotos, profilePic });
+            await authApi.updateProfile({ profilePic });
 
-            const profileRes = await fetch('http://localhost:5000/api/auth/profile', {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ profilePic }),
-            });
-
-            if (shopRes.ok && profileRes.ok) {
-                alert('Settings saved successfully.');
-                let adminUser = {};
-                try {
-                    adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
-                } catch (e) {}
-                localStorage.setItem('adminUser', JSON.stringify({ ...adminUser, profilePic }));
-            }
+            alert('Settings saved successfully.');
+            let adminUser = {};
+            try {
+                adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+            } catch (e) {}
+            localStorage.setItem('adminUser', JSON.stringify({ ...adminUser, profilePic }));
         } catch (error) {
             console.error('Save error:', error);
         } finally {
             setLoading(false);
         }
     };
+
 
     const addCoverPhoto = () => {
         if (coverInput && coverPhotos.length < 4) {

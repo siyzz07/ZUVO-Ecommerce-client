@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Mail, ArrowRight, ShieldCheck, Globe, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggle from '../../components/admin/ThemeToggle';
+import { authApi } from '../../api/authApi';
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('');
@@ -17,23 +18,13 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem('adminToken', data.token);
-                localStorage.setItem('adminUser', JSON.stringify(data.user));
-                navigate('/admin/dashboard');
-            } else {
-                setError(data.message || 'Invalid email or password');
-            }
-        } catch (err) {
-            setError('Connection failed. Please check your internet.');
+            const { data } = await authApi.login({ email, password });
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminUser', JSON.stringify(data.user));
+            navigate('/admin/dashboard');
+        } catch (err: any) {
+            const message = err.response?.data?.message || 'Connection failed. Please check your internet.';
+            setError(message);
         } finally {
             setLoading(false);
         }

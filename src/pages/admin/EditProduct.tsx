@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { productApi } from '../../api/productApi';
+import { categoryApi } from '../../api/categoryApi';
+import { uploadApi } from '../../api/uploadApi';
 
 const EditProduct = () => {
     const { id } = useParams();
@@ -33,23 +36,19 @@ const EditProduct = () => {
 
     const fetchProduct = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/products/${id}`);
-            if (response.ok) {
-                const data = await response.json();
-                setFormData({
-                    name: data.name || '',
-                    price: data.price?.toString() || '',
-                    originalPrice: data.originalPrice?.toString() || '',
-                    category: data.category || '',
-                    description: data.description || '',
-                    images: data.images?.length > 0 ? data.images : ['']
-                });
-            } else {
-                alert('Product not found');
-                navigate('/admin/dashboard');
-            }
+            const { data } = await productApi.getById(id!);
+            setFormData({
+                name: data.name || '',
+                price: data.price?.toString() || '',
+                originalPrice: data.originalPrice?.toString() || '',
+                category: data.category || '',
+                description: data.description || '',
+                images: data.images?.length > 0 ? data.images : ['']
+            });
         } catch (error) {
             console.error('Fetch error:', error);
+            alert('Product not found');
+            navigate('/admin/dashboard');
         } finally {
             setLoading(false);
         }
@@ -57,8 +56,7 @@ const EditProduct = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/categories');
-            const data = await response.json();
+            const { data } = await categoryApi.getAll();
             setCategories(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -85,17 +83,8 @@ const EditProduct = () => {
         uploadData.append('image', file);
 
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch('http://localhost:5000/api/upload/image', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: uploadData,
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                handleImageChange(index, data.url);
-            }
+            const { data } = await uploadApi.uploadImage(uploadData);
+            handleImageChange(index, data.url);
         } catch (error) {
             console.error('Upload error:', error);
         } finally {
@@ -119,24 +108,13 @@ const EditProduct = () => {
         setSaving(true);
 
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    price: Number(formData.price),
-                    originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined
-                }),
+            await productApi.update(id!, {
+                ...formData,
+                price: Number(formData.price),
+                originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined
             });
-
-            if (response.ok) {
-                alert('Product updated successfully.');
-                navigate('/admin/dashboard');
-            }
+            alert('Product updated successfully.');
+            navigate('/admin/dashboard');
         } catch (error) {
             console.error('Update error:', error);
         } finally {

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { productApi } from '../../api/productApi';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState<any[]>([]);
@@ -29,8 +30,7 @@ const AdminDashboard = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/products');
-            const data = await response.json();
+            const { data } = await productApi.getAll();
             setProducts(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -42,14 +42,8 @@ const AdminDashboard = () => {
         if (!confirm('Are you sure you want to delete this product?')) return;
         
         try {
-            const token = localStorage.getItem('adminToken');
-            const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-                setProducts(products.filter(p => p._id !== id));
-            }
+            await productApi.delete(id);
+            setProducts(products.filter(p => p._id !== id));
         } catch (error) {
             console.error('Delete error:', error);
         }
