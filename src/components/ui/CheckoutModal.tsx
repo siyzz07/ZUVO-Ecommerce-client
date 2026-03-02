@@ -86,21 +86,24 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
   const [position, setPosition] = useState<[number, number]>([28.6139, 77.209]); // default New Delhi
   const [locating, setLocating] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [locationSet, setLocationSet] = useState(false); // true only when user explicitly sets location
   const [errors, setErrors] = useState<{ phone?: string; address?: string }>({});
   const [mapStyle, setMapStyle] = useState<'satellite' | 'street'>('satellite');
   const mapRef = useRef<L.Map | null>(null);
 
-  /* Get user GPS on first open */
+  /* Try user GPS on first open */
   useEffect(() => {
     if (isOpen && navigator.geolocation) {
       setLocating(true);
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setPosition([pos.coords.latitude, pos.coords.longitude]);
+          setLocationSet(true); // user allowed GPS
           setLocating(false);
           setMapReady(true);
         },
         () => {
+          // GPS denied — map still shows but locationSet stays false
           setLocating(false);
           setMapReady(true);
         },
@@ -111,12 +114,19 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
     }
   }, [isOpen]);
 
+  /* Wrap setPosition to also mark locationSet */
+  const handlePositionChange = (pos: [number, number]) => {
+    setPosition(pos);
+    setLocationSet(true); // user manually picked a spot
+  };
+
   const handleLocateMe = () => {
     if (!navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setPosition([pos.coords.latitude, pos.coords.longitude]);
+        setLocationSet(true);
         setLocating(false);
       },
       () => setLocating(false),
@@ -135,8 +145,6 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
   const handleSubmit = () => {
     if (!validate()) return;
 
-    const mapsLink = `https://www.google.com/maps?q=${position[0]},${position[1]}`;
-
     /* Build WhatsApp message */
     let msg = `🛒 *New Order*\n\n`;
     items.forEach((item) => {
@@ -146,7 +154,11 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
     msg += `\n💰 *Total: ₹${total}*\n\n`;
     msg += `📞 *Phone:* ${phone}\n`;
     msg += `📍 *Address:* ${address}\n`;
-    msg += `🗺️ *Location:* ${mapsLink}\n`;
+    // Only include map link if user explicitly set a location
+    if (locationSet) {
+      const mapsLink = `https://www.google.com/maps?q=${position[0]},${position[1]}`;
+      msg += `🗺️ *Location:* ${mapsLink}\n`;
+    }
 
     const whatsappNumber = (shopPhone || '').replace(/[^0-9]/g, '');
     const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
@@ -270,7 +282,7 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       />
                     )}
-                    <LocationPicker position={position} setPosition={setPosition} />
+                    <LocationPicker position={position} setPosition={handlePositionChange} />
                     <FlyTo center={position} />
                   </MapContainer>
                 ) : (
