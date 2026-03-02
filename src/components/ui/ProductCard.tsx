@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useCartStore } from '../../store/useStore';
+import { useCartStore, useShopStore } from '../../store/useStore';
 import ProductCardImage from './product-card/ProductCardImage';
 import ProductCardInfo from './product-card/ProductCardInfo';
 import ProductCardActions from './product-card/ProductCardActions';
@@ -23,9 +23,13 @@ const ProductCard = (props: ProductCardProps) => {
     addItem({ id, name, price, image: images[0], qty: 1 });
   };
 
+  const shop = useShopStore((s) => s.settings);
+
   const handleOrderNow = () => {
-    const message = `Hi ZUVO! I want to order: ${name} (₹${price}). Is it available?`;
-    window.open(`https://wa.me/911234567890?text=${encodeURIComponent(message)}`, '_blank');
+    const shopName = shop?.shopName || 'Store';
+    const phone = (shop?.phone || '').replace(/[^0-9]/g, '');
+    const message = `Hi ${shopName}! I want to order: ${name} (₹${price}). Is it available?`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (

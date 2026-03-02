@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Phone, MapPin, Navigation, Send, ArrowLeft, Loader2 } from 'lucide-react';
+import { X, Phone, MapPin, Navigation, Send, ArrowLeft, Loader2, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import L from 'leaflet';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
@@ -15,6 +15,16 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
+});
+
+// Custom red marker for better visibility on satellite view
+const deliveryIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 interface CartItem {
@@ -48,6 +58,7 @@ const LocationPicker = ({ position, setPosition }: {
     <Marker
       position={position}
       draggable
+      icon={deliveryIcon}
       eventHandlers={{
         dragend(e) {
           const marker = e.target;
@@ -76,6 +87,7 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
   const [locating, setLocating] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [errors, setErrors] = useState<{ phone?: string; address?: string }>({});
+  const [mapStyle, setMapStyle] = useState<'satellite' | 'street'>('satellite');
   const mapRef = useRef<L.Map | null>(null);
 
   /* Get user GPS on first open */
@@ -241,15 +253,23 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
                 {mapReady ? (
                   <MapContainer
                     center={position}
-                    zoom={15}
+                    zoom={16}
                     scrollWheelZoom
                     className="h-full w-full z-0"
                     ref={mapRef}
                   >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
+                    {mapStyle === 'satellite' ? (
+                      <TileLayer
+                        attribution='&copy; Esri'
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        maxZoom={19}
+                      />
+                    ) : (
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                    )}
                     <LocationPicker position={position} setPosition={setPosition} />
                     <FlyTo center={position} />
                   </MapContainer>
@@ -257,6 +277,17 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
                   <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-900/50">
                     <Loader2 size={28} className="animate-spin text-brand-primary" />
                   </div>
+                )}
+
+                {/* Map style toggle */}
+                {mapReady && (
+                  <button
+                    onClick={() => setMapStyle((s) => s === 'satellite' ? 'street' : 'satellite')}
+                    className="absolute top-3 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-zinc-200 dark:border-white/10 shadow-lg text-[11px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 transition-all"
+                  >
+                    <Layers size={14} />
+                    {mapStyle === 'satellite' ? 'Street' : 'Satellite'}
+                  </button>
                 )}
               </div>
 

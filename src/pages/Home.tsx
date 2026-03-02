@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Phone, MapPin, MessageCircle, Instagram, Twitter, Facebook, 
     LayoutGrid, Image as ImageIcon, Info, FileText, Share2, 
-    ShieldCheck, UserPlus, ChevronLeft, ChevronRight 
+    ShieldCheck, UserPlus, ChevronLeft, ChevronRight, User 
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ProductsSection from '../components/home/sections/ProductsSection';
@@ -77,18 +77,18 @@ const Home = () => {
   const handleSaveContact = () => {
     const vcard = `BEGIN:VCARD
 VERSION:3.0
-FN:${shopSettings?.shopName || 'ZUVO Mobile Hub'}
-N:Hub;${shopSettings?.shopName?.split(' ')[0] || 'ZUVO'};Mobile;;
+FN:${shopSettings?.shopName || 'Store'}
+N:;${shopSettings?.shopName?.split(' ')[0] || 'Store'};;;
 TEL;TYPE=CELL:${shopSettings?.phone || '+911234567890'}
 EMAIL;TYPE=WORK:${shopSettings?.email || 'support@zuvo.com'}
-ORG:${shopSettings?.shopName || 'ZUVO Mobile Hub'}
+ORG:${shopSettings?.shopName || 'Store'}
 ADR;TYPE=WORK:;;${shopSettings?.address || '123 Premium Street, Hub Lane;Gadget City;;India'}
 END:VCARD`;
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'ZUVO_Contact.vcf');
+    link.setAttribute('download', `${shopSettings?.shopName || 'Store'}_Contact.vcf`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -130,16 +130,27 @@ END:VCARD`;
       <section className="relative overflow-hidden">
         <div className="h-40 md:h-80 w-full relative">
           <AnimatePresence mode="wait">
-            <motion.img 
-              key={currentCoverIndex}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8 }}
-              src={shopSettings?.coverPhotos?.[currentCoverIndex] || "https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=1600&auto=format&fit=crop"} 
-              className="w-full h-full object-cover" 
-              alt="Cover" 
-            />
+            {shopSettings?.coverPhotos?.[currentCoverIndex] ? (
+              <motion.img 
+                key={currentCoverIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                src={shopSettings.coverPhotos[currentCoverIndex]} 
+                className="w-full h-full object-cover" 
+                alt="Cover" 
+              />
+            ) : (
+              <motion.div
+                key="cover-placeholder"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="w-full h-full bg-gradient-to-br from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-900 dark:to-zinc-800 flex items-center justify-center"
+              >
+                <ImageIcon size={48} className="text-zinc-300 dark:text-zinc-700" strokeWidth={1.5} />
+              </motion.div>
+            )}
           </AnimatePresence>
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
           
@@ -161,18 +172,24 @@ END:VCARD`;
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
-              className="w-32 h-32 md:w-44 md:h-44 rounded-3xl md:rounded-[2.5rem] border-[4px] border-white dark:border-zinc-950 overflow-hidden shadow-luxury bg-white"
+              className="w-32 h-32 md:w-44 md:h-44 rounded-3xl md:rounded-[2.5rem] border-[4px] border-white dark:border-zinc-950 overflow-hidden shadow-luxury bg-white dark:bg-zinc-900"
             >
-              <img 
-                src={shopSettings?.profilePic || "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=400&auto=format&fit=crop"} 
-                className="w-full h-full object-cover" 
-                alt="Profile" 
-              />
+              {shopSettings?.profilePic ? (
+                <img 
+                  src={shopSettings.profilePic} 
+                  className="w-full h-full object-cover" 
+                  alt="Profile" 
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+                  <User size={48} className="text-zinc-300 dark:text-zinc-600" strokeWidth={1.5} />
+                </div>
+              )}
             </motion.div>
             
             <div className="flex-1 text-center md:text-left pb-2">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{shopSettings?.shopName || 'ZUVO Mobile'}</h1>
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{shopSettings?.shopName || 'Store'}</h1>
                 <span className="px-2.5 py-0.5 bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase rounded-md">Official</span>
               </div>
               <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-sm md:text-base leading-snug max-w-lg mx-auto md:mx-0">
@@ -286,11 +303,11 @@ END:VCARD`;
       <footer className="px-5 py-12 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-2 grayscale opacity-50">
-               <span className="font-extrabold text-xl tracking-tighter">{shopSettings?.shopName || 'ZUVO'}</span>
+               <span className="font-extrabold text-xl tracking-tighter">{shopSettings?.shopName || 'Store'}</span>
             </div>
             
             <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest text-center">
-              © {new Date().getFullYear()} {shopSettings?.shopName || 'ZUVO Mobile Hub'} • Standards of Excellence
+              © {new Date().getFullYear()} {shopSettings?.shopName || 'Store'} • Standards of Excellence
             </p>
             
             <div className="flex gap-4">

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, MessageCircle, Star, ShieldCheck, Truck, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Product } from '../../types';
-import { useCartStore } from '../../store/useStore';
+import { useCartStore, useShopStore } from '../../store/useStore';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -20,9 +20,13 @@ const ProductDetailsModal = ({ product, isOpen, onClose }: ProductDetailsModalPr
 
   if (!product) return null;
 
+  const shop = useShopStore((s) => s.settings);
+
   const handleWhatsAppOrder = () => {
-    const message = `Hi ZUVO! I'm interested in buying: ${product.name} (₹${product.price}). Is it in stock?`;
-    window.open(`https://wa.me/911234567890?text=${encodeURIComponent(message)}`, '_blank');
+    const shopName = shop?.shopName || 'Store';
+    const phone = (shop?.phone || '').replace(/[^0-9]/g, '');
+    const message = `Hi ${shopName}! I'm interested in buying: ${product.name} (₹${product.price}). Is it in stock?`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const nextImage = () => {

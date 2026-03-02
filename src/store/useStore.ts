@@ -85,3 +85,40 @@ export const useSearchStore = create<SearchState>()((set) => ({
   setQuery: (query: string) => set({ query }),
   clearQuery: () => set({ query: '' }),
 }));
+
+/* ── Shop Settings (fetched once, shared globally) ──────────── */
+interface ShopSettings {
+  shopName: string;
+  description: string;
+  address: string;
+  phone: string;
+  email: string;
+  profilePic: string;
+  coverPhotos: string[];
+  location: { lat: number; lng: number };
+}
+
+interface ShopState {
+  settings: ShopSettings | null;
+  loading: boolean;
+  setSettings: (s: ShopSettings) => void;
+  fetchSettings: () => Promise<void>;
+}
+
+export const useShopStore = create<ShopState>()((set, get) => ({
+  settings: null,
+  loading: false,
+  setSettings: (s: ShopSettings) => set({ settings: s }),
+  fetchSettings: async () => {
+    if (get().settings || get().loading) return; // already fetched or in-progress
+    set({ loading: true });
+    try {
+      const { shopApi } = await import('../api/shopApi');
+      const { data } = await shopApi.getSettings();
+      set({ settings: data, loading: false });
+    } catch {
+      set({ loading: false });
+    }
+  },
+}));
+

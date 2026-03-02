@@ -4,6 +4,7 @@ import { Lock, Mail, ArrowRight, ShieldCheck, Globe, Zap } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from '../../components/admin/ThemeToggle';
 import { authApi } from '../../api/authApi';
+import { useShopStore } from '../../store/useStore';
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ const AdminLogin = () => {
 
     // Redirect to the page the user was trying to visit, or dashboard
     const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
+    const shopName = useShopStore((s) => s.settings?.shopName || 'Store');
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,7 +54,7 @@ const AdminLogin = () => {
                         <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-xl shadow-brand-primary/20">
                             <ShieldCheck className="text-white" size={20} />
                         </div>
-                        <span className="text-white font-extrabold text-xl tracking-tight uppercase">ZUVO</span>
+                        <span className="text-white font-extrabold text-xl tracking-tight uppercase">{shopName}</span>
                     </div>
 
                     <div className="max-w-md">

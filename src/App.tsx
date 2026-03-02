@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useThemeStore } from './store/useStore';
+import { useThemeStore, useShopStore } from './store/useStore';
 import Navbar from './components/layout/Navbar';
 import BottomNav from './components/layout/BottomNav';
 import Home from './pages/Home';
@@ -36,6 +36,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const { theme } = useThemeStore();
+  const fetchSettings = useShopStore((s) => s.fetchSettings);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -45,6 +46,10 @@ function App() {
       root.classList.remove('dark');
     }
   }, [theme]);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   return (
     <Router>

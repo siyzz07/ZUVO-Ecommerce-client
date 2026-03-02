@@ -1,10 +1,12 @@
 import { Moon, Sun, Search, X } from 'lucide-react';
-import { useThemeStore, useSearchStore } from '../../store/useStore';
+import { useThemeStore, useSearchStore, useShopStore } from '../../store/useStore';
 import { motion } from 'framer-motion';
 
 const Navbar = () => {
   const { theme, toggleTheme } = useThemeStore();
   const { query, setQuery, clearQuery } = useSearchStore();
+  const shopName = useShopStore((s) => s.settings?.shopName || 'Store');
+  const initial = shopName.charAt(0).toUpperCase();
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-100 dark:border-white/5 px-4 md:px-12 py-3 flex justify-between items-center transition-all duration-300">
@@ -14,10 +16,10 @@ const Navbar = () => {
         className="flex items-center gap-2"
       >
         <div className="w-9 h-9 bg-brand-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-primary/20">
-           <span className="text-lg font-black tracking-tighter">Z</span>
+           <span className="text-lg font-black tracking-tighter">{initial}</span>
         </div>
         <h1 className="text-xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter uppercase ml-0.5">
-          ZUVO<span className="text-brand-primary">.</span>
+          {shopName}<span className="text-brand-primary">.</span>
         </h1>
       </motion.div>
 
