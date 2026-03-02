@@ -83,41 +83,50 @@ const FlyTo = ({ center }: { center: [number, number] }) => {
 const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutModalProps) => {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [position, setPosition] = useState<[number, number]>([28.6139, 77.209]); // default New Delhi
+  const [position, setPosition] = useState<[number, number]>([28.6139, 77.209]);
   const [locating, setLocating] = useState(false);
   const [mapReady, setMapReady] = useState(false);
-  const [locationSet, setLocationSet] = useState(false); // true only when user explicitly sets location
+  const [includeLocation, setIncludeLocation] = useState(false);
+  const [locationSet, setLocationSet] = useState(false);
   const [errors, setErrors] = useState<{ phone?: string; address?: string }>({});
   const [mapStyle, setMapStyle] = useState<'satellite' | 'street'>('satellite');
   const mapRef = useRef<L.Map | null>(null);
 
-  /* Try user GPS on first open */
-  useEffect(() => {
-    if (isOpen && navigator.geolocation) {
-      setLocating(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setPosition([pos.coords.latitude, pos.coords.longitude]);
-          setLocationSet(true); // user allowed GPS
-          setLocating(false);
-          setMapReady(true);
-        },
-        () => {
-          // GPS denied — map still shows but locationSet stays false
-          setLocating(false);
-          setMapReady(true);
-        },
-        { enableHighAccuracy: true, timeout: 8000 }
-      );
-    } else {
+  /* Request GPS — called when toggle is enabled or "Use My Location" is tapped */
+  const requestGPS = () => {
+    if (!navigator.geolocation) {
       setMapReady(true);
+      return;
     }
-  }, [isOpen]);
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPosition([pos.coords.latitude, pos.coords.longitude]);
+        setLocationSet(true);
+        setLocating(false);
+        setMapReady(true);
+      },
+      () => {
+        setLocating(false);
+        setMapReady(true);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
-  /* Wrap setPosition to also mark locationSet */
+  /* Handle the toggle */
+  const handleToggleLocation = () => {
+    const next = !includeLocation;
+    setIncludeLocation(next);
+    if (next && !mapReady) {
+      requestGPS();
+    }
+  };
+
+  /* Wrap setPosition so tapping / dragging also marks locationSet */
   const handlePositionChange = (pos: [number, number]) => {
     setPosition(pos);
-    setLocationSet(true); // user manually picked a spot
+    setLocationSet(true);
   };
 
   const handleLocateMe = () => {
@@ -130,7 +139,7 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
         setLocating(false);
       },
       () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -154,8 +163,7 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
     msg += `\n💰 *Total: ₹${total}*\n\n`;
     msg += `📞 *Phone:* ${phone}\n`;
     msg += `📍 *Address:* ${address}\n`;
-    // Only include map link if user explicitly set a location
-    if (locationSet) {
+    if (includeLocation && locationSet) {
       const mapsLink = `https://www.google.com/maps?q=${position[0]},${position[1]}`;
       msg += `🗺️ *Location:* ${mapsLink}\n`;
     }
@@ -245,68 +253,102 @@ const CheckoutModal = ({ isOpen, onClose, items, total, shopPhone }: CheckoutMod
               {errors.address && <p className="text-red-500 text-xs font-bold mt-1.5 ml-1">{errors.address}</p>}
             </div>
 
-            {/* Map Section */}
+            {/* ── Location Toggle ──────────────────────────────── */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
-                  Pin Your Location
-                </label>
-                <button
-                  onClick={handleLocateMe}
-                  disabled={locating}
-                  className="flex items-center gap-1.5 text-brand-primary text-xs font-bold hover:opacity-80 transition-opacity disabled:opacity-50"
-                >
-                  {locating ? <Loader2 size={14} className="animate-spin" /> : <Navigation size={14} />}
-                  {locating ? 'Locating...' : 'Use My Location'}
-                </button>
-              </div>
-
-              <div className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 h-[240px] md:h-[280px] relative">
-                {mapReady ? (
-                  <MapContainer
-                    center={position}
-                    zoom={16}
-                    scrollWheelZoom
-                    className="h-full w-full z-0"
-                    ref={mapRef}
-                  >
-                    {mapStyle === 'satellite' ? (
-                      <TileLayer
-                        attribution='&copy; Esri'
-                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                        maxZoom={19}
-                      />
-                    ) : (
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      />
-                    )}
-                    <LocationPicker position={position} setPosition={handlePositionChange} />
-                    <FlyTo center={position} />
-                  </MapContainer>
-                ) : (
-                  <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-900/50">
-                    <Loader2 size={28} className="animate-spin text-brand-primary" />
+              <button
+                onClick={handleToggleLocation}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                  includeLocation
+                    ? 'border-brand-primary/30 bg-brand-primary/5 dark:bg-brand-primary/10'
+                    : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <MapPin size={18} className={includeLocation ? 'text-brand-primary' : 'text-zinc-400'} />
+                  <div className="text-left">
+                    <p className={`text-sm font-bold ${includeLocation ? 'text-brand-primary' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                      Share my location
+                    </p>
+                    <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                      {includeLocation ? 'Location will be included in your order' : 'Tap to pin your delivery location on the map'}
+                    </p>
                   </div>
-                )}
-
-                {/* Map style toggle */}
-                {mapReady && (
-                  <button
-                    onClick={() => setMapStyle((s) => s === 'satellite' ? 'street' : 'satellite')}
-                    className="absolute top-3 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-zinc-200 dark:border-white/10 shadow-lg text-[11px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 transition-all"
-                  >
-                    <Layers size={14} />
-                    {mapStyle === 'satellite' ? 'Street' : 'Satellite'}
-                  </button>
-                )}
-              </div>
-
-              <p className="text-zinc-400 text-[10px] font-medium mt-2 text-center">
-                Tap on the map or drag the marker to set your delivery location
-              </p>
+                </div>
+                {/* Toggle switch */}
+                <div className={`w-11 h-6 rounded-full relative transition-colors flex-shrink-0 ${includeLocation ? 'bg-brand-primary' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+                  <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${includeLocation ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+                </div>
+              </button>
             </div>
+
+            {/* ── Map Section (shown only when toggle is ON) ──── */}
+            {includeLocation && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">
+                    Pin Your Location
+                  </label>
+                  <button
+                    onClick={handleLocateMe}
+                    disabled={locating}
+                    className="flex items-center gap-1.5 text-brand-primary text-xs font-bold hover:opacity-80 transition-opacity disabled:opacity-50"
+                  >
+                    {locating ? <Loader2 size={14} className="animate-spin" /> : <Navigation size={14} />}
+                    {locating ? 'Locating...' : 'Use My Location'}
+                  </button>
+                </div>
+
+                <div className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 h-[240px] md:h-[280px] relative">
+                  {mapReady ? (
+                    <MapContainer
+                      center={position}
+                      zoom={16}
+                      scrollWheelZoom
+                      className="h-full w-full z-0"
+                      ref={mapRef}
+                    >
+                      {mapStyle === 'satellite' ? (
+                        <TileLayer
+                          attribution='&copy; Esri'
+                          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                          maxZoom={19}
+                        />
+                      ) : (
+                        <TileLayer
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                      )}
+                      <LocationPicker position={position} setPosition={handlePositionChange} />
+                      <FlyTo center={position} />
+                    </MapContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-900/50">
+                      <Loader2 size={28} className="animate-spin text-brand-primary" />
+                    </div>
+                  )}
+
+                  {/* Map style toggle */}
+                  {mapReady && (
+                    <button
+                      onClick={() => setMapStyle((s) => s === 'satellite' ? 'street' : 'satellite')}
+                      className="absolute top-3 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-zinc-200 dark:border-white/10 shadow-lg text-[11px] font-bold text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 transition-all"
+                    >
+                      <Layers size={14} />
+                      {mapStyle === 'satellite' ? 'Street' : 'Satellite'}
+                    </button>
+                  )}
+                </div>
+
+                <p className="text-zinc-400 text-[10px] font-medium mt-2 text-center">
+                  Tap on the map or drag the marker to set your delivery location
+                </p>
+              </motion.div>
+            )}
           </div>
 
           {/* ── Footer / Submit ────────────────────────────────── */}
